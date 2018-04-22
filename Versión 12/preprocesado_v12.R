@@ -1,0 +1,32 @@
+###### EN ESTE ARCHIVO VAMOS A LLEVAR A CABO EL PREPROCESADO DE LOS DATOS
+
+train = read.csv("../train.csv", header = TRUE, sep = ",")
+test = read.csv("../test.csv", header = TRUE, sep = ",")
+
+
+## Versión 12: utilizamos la mejor versión hasta el momento -> La versión 8
+library(DMwR)
+
+## Aunque utilicemos predicción para el resto de valores perdidos, eliminamos aquellos que tienen demasiados
+## No pueden estimarse el resto de valores
+train['Alley'] <- NULL 
+train['MiscFeature'] <- NULL 
+train['Fence'] <- NULL 
+train['PoolQC'] <- NULL 
+
+test['Alley'] <- NULL 
+test['MiscFeature'] <- NULL 
+test['Fence'] <- NULL 
+test['PoolQC'] <- NULL 
+
+#Eliminamos outliers
+train[is.numeric(train) && train %in% boxplot.stats(train)$out]
+
+
+#Estimamos el resto de valores perdidos
+noNA_train <- knnImputation(train, k = 30) ##Utiliamos 30 vecinos más cercanos
+noNA_test <- knnImputation(test, k = 30) 
+
+#Guardamos en nuevos datasets
+write.csv(noNA_train, file = "notNA_train.csv", sep = ",", row.names = FALSE)
+write.csv(noNA_test, file = "notNA_test.csv", sep = ",", row.names = FALSE)
